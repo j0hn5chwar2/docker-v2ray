@@ -42,7 +42,7 @@
       "streamSettings": {
         "network": "kcp",
         "kcpSettings": {
-          "mtu": [KCP_MUT],
+          "mtu": [KCP_MTU],
           "tti": [KCP_TTI],
           "uplinkCapacity": [KCP_UPLINK],
           "downlinkCapacity": [KCP_DOWNLINK],
