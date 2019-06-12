@@ -1,40 +1,30 @@
-FROM golang:latest as builder
-LABEL MAINTAINER="wnxd <imiku@wnxd.me>"
+FROM ubuntu:latest as builder
 
-RUN go get -u v2ray.com/core/...
-RUN mkdir -p /usr/bin/v2ray/
-RUN go build -o /usr/bin/v2ray/v2ray v2ray.com/core/main
-RUN go build -o /usr/bin/v2ray/v2ctl v2ray.com/core/infra/control/main
-RUN cp -r ${GOPATH}/src/v2ray.com/core/release/config/* /usr/bin/v2ray/
+RUN apt-get update
+RUN apt-get install curl -y
+RUN curl -L -o /tmp/go.sh https://install.direct/go.sh
+RUN chmod +x /tmp/go.sh
+RUN /tmp/go.sh
 
 FROM alpine:latest
 
-RUN apk update
-RUN apk upgrade
-RUN apk add ca-certificates && update-ca-certificates
-# Change TimeZone
-RUN apk add --update tzdata
-ENV TZ=Asia/Shanghai
-# Clean APK cache
-RUN rm -rf /var/cache/apk/*
+LABEL maintainer "Darian Raymond <admin@v2ray.com>"
 
-RUN mkdir /usr/bin/v2ray/
-RUN mkdir /etc/v2ray/
-RUN mkdir /var/log/v2ray/
-
-COPY --from=builder /usr/bin/v2ray /usr/bin/v2ray
+COPY --from=builder /usr/bin/v2ray/v2ray /usr/bin/v2ray/
+COPY --from=builder /usr/bin/v2ray/v2ctl /usr/bin/v2ray/
+COPY --from=builder /usr/bin/v2ray/geoip.dat /usr/bin/v2ray/
+COPY --from=builder /usr/bin/v2ray/geosite.dat /usr/bin/v2ray/
 COPY config.json /etc/v2ray/config.json
-COPY entrypoint.sh /usr/bin/entrypoint.sh
 
-#RUN set -ex && \
-#    apk --no-cache upgrade && \
-#    apk --no-cache add \
-#        bash \
-#        ca-certificates \
-#        openssh-server && \
-#    rm -rf /var/cache/apk/* && \
-#    ssh-keygen -A && \
-#    mkdir /var/log/v2ray/
+RUN set -ex && \
+    apk --no-cache add ca-certificates && \
+    mkdir /var/log/v2ray/ &&\
+    chmod +x /usr/bin/v2ray/v2ctl && \
+    chmod +x /usr/bin/v2ray/v2ray
+
+ENV PATH /usr/bin/v2ray:$PATH
+
+CMD ["v2ray", "-config=/etc/v2ray/config.json"]
 
 ENV ROOT_PASSWORD=alpine
 
