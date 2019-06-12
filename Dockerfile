@@ -2,11 +2,16 @@ FROM golang:latest as builder
 LABEL MAINTAINER="wnxd <imiku@wnxd.me>"
 
 RUN go get -u v2ray.com/core/...
-RUN go get -u v2ray.com/ext/...
-RUN go install v2ray.com/ext/tools/build/vbuild
-RUN vbuild -dir /usr/bin/v2ray
+RUN mkdir -p /usr/bin/v2ray/
+RUN go build -o /usr/bin/v2ray/v2ray v2ray.com/core/main
+RUN go build -o /usr/bin/v2ray/v2ctl v2ray.com/core/infra/control/main
+RUN cp -r ${GOPATH}/src/v2ray.com/core/release/config/* /usr/bin/v2ray/
 
 FROM alpine:latest
+
+RUN mkdir /usr/bin/v2ray/
+RUN mkdir /etc/v2ray/
+RUN mkdir /var/log/v2ray/
 
 COPY --from=builder /usr/bin/v2ray /usr/bin/v2ray
 COPY config.json /etc/v2ray/config.json
