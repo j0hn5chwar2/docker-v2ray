@@ -26,15 +26,15 @@ COPY --from=builder /usr/bin/v2ray /usr/bin/v2ray
 COPY config.json /etc/v2ray/config.json
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 
-RUN set -ex && \
-    apk --no-cache upgrade && \
-    apk --no-cache add \
-        bash \
-        ca-certificates \
-        openssh-server && \
-    rm -rf /var/cache/apk/* && \
-    ssh-keygen -A && \
-    mkdir /var/log/v2ray/
+#RUN set -ex && \
+#    apk --no-cache upgrade && \
+#    apk --no-cache add \
+#        bash \
+#        ca-certificates \
+#        openssh-server && \
+#    rm -rf /var/cache/apk/* && \
+#    ssh-keygen -A && \
+#    mkdir /var/log/v2ray/
 
 ENV ROOT_PASSWORD=alpine
 
